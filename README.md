@@ -318,15 +318,33 @@ pytest tests/test_api.py -v
 
 ---
 
-## 🚀 Images
+## 🚀 Project Banner
 
-images/banner.png
-images/eda.png
-images/model_analysis.png
-images/swagger.png
-images/prediction_api.png
+![Project Banner](images/banner.png)
 
 ---
+
+## 📊 Exploratory Data Analysis
+
+![EDA](images/eda.png)
+
+---
+
+## 📈 Model Analysis
+
+![Model Analysis](images/model_analysis.png)
+
+---
+
+## 🌐 FastAPI Swagger Documentation
+
+![Swagger UI](images/swagger.png)
+
+---
+
+## 🔮 Prediction Example
+
+![Prediction API](images/prediction_api.png)
 
 
 ## 🛠 Tech Stack
