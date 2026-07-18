@@ -5,8 +5,10 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from src.features import FEATURE_COLUMNS
-
+from src.features import (
+    FEATURE_COLUMNS,
+    create_features,
+)
 
 # --------------------------------------------------
 # PROJECT PATHS
@@ -42,12 +44,17 @@ app = FastAPI(
 )
 
 
-# --------------------------------------------------
-# INPUT SCHEMA
-# --------------------------------------------------
+class Candle(BaseModel):
+    date: str
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float
+
 
 class PredictionInput(BaseModel):
-    features: dict[str, float]
+    candles: list[Candle]
 
 
 # --------------------------------------------------
@@ -82,35 +89,59 @@ def health_check():
 @app.post("/predict")
 def predict(input_data: PredictionInput):
 
-    missing_features = [
-        feature
-        for feature in FEATURE_COLUMNS
-        if feature not in input_data.features
-    ]
-
-    if missing_features:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "message": "Required model features are missing.",
-                "missing_features": missing_features,
-            },
-        )
-
     try:
+
+        # Require enough historical candles to compute
+        # rolling features safely.
+        if len(input_data.candles) < 30:
+            raise HTTPException(
+                status_code=400,
+                detail="At least 30 historical candles are required.",
+            )
+
+        # Convert request into a DataFrame
         input_df = pd.DataFrame(
-            [
-                {
-                    feature: input_data.features[feature]
-                    for feature in FEATURE_COLUMNS
-                }
-            ]
+            [candle.model_dump() for candle in input_data.candles]
         )
 
-        prediction = int(model.predict(input_df)[0])
+        # Convert date column to datetime
+        input_df["date"] = pd.to_datetime(input_df["date"])
+
+        # Ensure chronological order
+        input_df = (
+            input_df
+            .sort_values("date")
+            .reset_index(drop=True)
+        )
+
+        # Compute engineered features
+        feature_df = create_features(input_df)
+
+        # Remove rows where rolling features are unavailable
+        feature_df = feature_df.dropna(
+    subset=FEATURE_COLUMNS
+)
+        
+        if feature_df.empty:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Not enough valid historical data to compute "
+                    "model features."
+                ),
+            )
+
+        # Select the latest feature vector
+        latest_features = (
+            feature_df.iloc[[-1]][FEATURE_COLUMNS]
+        )
+
+        prediction = int(
+            model.predict(latest_features)[0]
+        )
 
         prediction_probability = float(
-            model.predict_proba(input_df)[0][prediction]
+            model.predict_proba(latest_features)[0][prediction]
         )
 
         direction = "UP" if prediction == 1 else "DOWN"
@@ -120,6 +151,9 @@ def predict(input_data: PredictionInput):
             "predicted_direction": direction,
             "confidence": round(prediction_probability, 4),
         }
+
+    except HTTPException:
+        raise
 
     except Exception as error:
         raise HTTPException(

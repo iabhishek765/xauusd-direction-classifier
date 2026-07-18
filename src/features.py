@@ -72,11 +72,32 @@ def create_features(df: pd.DataFrame) -> pd.DataFrame:
     # ==================================================
     # MOMENTUM FEATURES
     # ==================================================
+    # Momentum measures how far the current price is
+    # trading above or below its recent moving average.
+    # Unlike percentage returns, these features capture
+    # the current strength of price relative to its
+    # recent trend.
 
-    df["momentum_3h"] = df["close"].pct_change(periods=3)
-    df["momentum_6h"] = df["close"].pct_change(periods=6)
-    df["momentum_12h"] = df["close"].pct_change(periods=12)
-    df["momentum_24h"] = df["close"].pct_change(periods=24)
+    momentum_ma_3 = df["close"].rolling(window=3).mean()
+    momentum_ma_6 = df["close"].rolling(window=6).mean()
+    momentum_ma_12 = df["close"].rolling(window=12).mean()
+    momentum_ma_24 = df["close"].rolling(window=24).mean()
+
+    df["momentum_3h"] = (
+        df["close"] / momentum_ma_3
+    ) - 1
+
+    df["momentum_6h"] = (
+        df["close"] / momentum_ma_6
+    ) - 1
+
+    df["momentum_12h"] = (
+        df["close"] / momentum_ma_12
+    ) - 1
+
+    df["momentum_24h"] = (
+        df["close"] / momentum_ma_24
+    ) - 1
 
     # ==================================================
     # CANDLE FEATURES
