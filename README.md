@@ -1,6 +1,6 @@
 # 📈 XAU/USD Direction Classifier
 
-> > End-to-end Machine Learning project for predicting the next-hour direction of XAU/USD (Gold vs US Dollar). The API accepts raw OHLC market candles, performs feature engineering internally, and serves predictions through a FastAPI inference service.
+> End-to-end Machine Learning project for predicting the next-hour direction of XAU/USD (Gold vs US Dollar). The API accepts raw OHLC market candles, performs feature engineering internally, and serves predictions through a FastAPI inference service.
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML-orange)
 ![FastAPI](https://img.shields.io/badge/FastAPI-API-green)
@@ -33,6 +33,8 @@ Rather than focusing only on model accuracy, the project emphasizes building a p
 Unlike many ML demonstrations that require clients to compute engineered features before inference, this project exposes a production-oriented API.
 
 Clients provide historical OHLC market candles, while the API performs feature engineering internally before generating predictions. This keeps the client interface simple, reduces implementation errors, and mirrors real-world machine learning deployment practices.
+
+---
 
 # Project Workflow
 
@@ -68,6 +70,8 @@ API Feature Engineering
           ▼
 Prediction
 ```
+
+---
 
 
 # Dataset
@@ -205,7 +209,10 @@ Returns:
 
 ### Prediction
 
----
+```
+POST /predict
+```
+
 Accepts approximately **30 historical OHLC candles**.
 
 The API performs feature engineering internally and predicts the direction of the next hourly candle.
@@ -218,6 +225,7 @@ Example response:
   "predicted_direction": "UP",
   "confidence": 0.5626
 }
+```
 ---
 
 # API Documentation
@@ -307,7 +315,7 @@ pip install -r requirements.txt
 # Run the API
 
 ```bash
-uvicorn api.main:app --reload
+python -m uvicorn api.main:app --reload
 ```
 
 Open
@@ -362,12 +370,10 @@ python -m pytest
 | Language | Python |
 | ML | Scikit-Learn |
 | API | FastAPI |
+| Model Serving | Uvicorn |
 | Testing | Pytest |
 | Visualization | Matplotlib |
 | Data | Pandas, NumPy |
-| Deployment | Uvicorn |
-| Testing | Pytest |
-| Model Serving | FastAPI + Uvicorn |
 
 ---
 
@@ -386,6 +392,8 @@ python -m pytest
 - Real-time Dashboard
 - Probability Calibration
 - Feature Importance Analysis
+
+  
 ---
 
 # Limitations
