@@ -1,7 +1,6 @@
 # 📈 XAU/USD Direction Classifier
 
-> Machine Learning project for predicting the next-hour direction of XAU/USD (Gold vs US Dollar) using engineered technical features and a FastAPI inference service.
-
+> > End-to-end Machine Learning project for predicting the next-hour direction of XAU/USD (Gold vs US Dollar). The API accepts raw OHLC market candles, performs feature engineering internally, and serves predictions through a FastAPI inference service.
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML-orange)
 ![FastAPI](https://img.shields.io/badge/FastAPI-API-green)
@@ -29,6 +28,12 @@ Rather than focusing only on model accuracy, the project emphasizes building a p
 
 ---
 
+# Production-Oriented Design
+
+Unlike many ML demonstrations that require clients to compute engineered features before inference, this project exposes a production-oriented API.
+
+Clients provide historical OHLC market candles, while the API performs feature engineering internally before generating predictions. This keeps the client interface simple, reduces implementation errors, and mirrors real-world machine learning deployment practices.
+
 # Project Workflow
 
 ```
@@ -52,16 +57,18 @@ Model Training
 Model Evaluation
           │
           ▼
-Model Analysis
-          │
-          ▼
 FastAPI Deployment
           │
           ▼
-REST API Prediction
+Raw OHLC Candles
+          │
+          ▼
+API Feature Engineering
+          │
+          ▼
+Prediction
 ```
 
----
 
 # Dataset
 
@@ -76,6 +83,8 @@ REST API Prediction
 # Feature Engineering
 
 The final model uses **26 engineered features**, including:
+
+The FastAPI service computes these features internally from raw OHLC market candles, allowing API clients to send only historical market data rather than pre-engineered features.
 
 ### Price Returns
 
@@ -196,11 +205,12 @@ Returns:
 
 ### Prediction
 
-```
-POST /predict
-```
+---
+Accepts approximately **30 historical OHLC candles**.
 
-Accepts engineered feature values and returns:
+The API performs feature engineering internally and predicts the direction of the next hourly candle.
+
+Example response:
 
 ```json
 {
@@ -208,8 +218,6 @@ Accepts engineered feature values and returns:
   "predicted_direction": "UP",
   "confidence": 0.5626
 }
-```
-
 ---
 
 # API Documentation
@@ -224,13 +232,13 @@ http://127.0.0.1:8000/docs
 
 # Automated Testing
 
-API endpoints are tested using **pytest**.
-
-Verified endpoints:
+Automated tests verify:
 
 - Root endpoint
 - Health endpoint
-- Prediction endpoint
+- Prediction endpoint using raw OHLC candles
+- Feature engineering output
+- Feature completeness
 
 All API tests pass successfully.
 
@@ -313,7 +321,7 @@ http://127.0.0.1:8000/docs
 # Run Tests
 
 ```bash
-pytest tests/test_api.py -v
+python -m pytest
 ```
 
 ---
@@ -358,6 +366,8 @@ pytest tests/test_api.py -v
 | Visualization | Matplotlib |
 | Data | Pandas, NumPy |
 | Deployment | Uvicorn |
+| Testing | Pytest |
+| Model Serving | FastAPI + Uvicorn |
 
 ---
 
@@ -374,6 +384,8 @@ pytest tests/test_api.py -v
 - CI/CD Pipeline
 - Cloud Deployment (AWS)
 - Real-time Dashboard
+- Probability Calibration
+- Feature Importance Analysis
 ---
 
 # Limitations
